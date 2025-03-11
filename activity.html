@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Employee Activity</title>
+  <!-- Include Firebase SDK -->
+  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database.js"></script>
+</head>
+<body>
+  <h1>Employee Activity Today</h1>
+  <form id="empForm">
+    <label for="empcode">Employee Code:</label>
+    <input type="text" id="empcode" name="empcode" required>
+    <button type="submit">Get Activity</button>
+  </form>
+  <div id="activityData"></div>
+
+  <script>
+    // Firebase configuration
+    const firebaseConfig = {
+      apiKey: "AIzaSyCoQdtouhudYD7VM5vTct5QTs1c3lgUhFI",
+      authDomain: "lagnuvoservice-f651e.firebaseapp.com",
+      databaseURL: "https://lagnuvoservice-f651e-default-rtdb.asia-southeast1.firebasedatabase.app",
+      projectId: "lagnuvoservice-f651e",
+      storageBucket: "lagnuvoservice-f651e.firebasestorage.app",
+      messagingSenderId: "801285748748",
+      appId: "1:801285748748:android:9ef76514005073a1071629"
+    };
+
+    // Initialize Firebase
+    const app = firebase.initializeApp(firebaseConfig);
+    const database = firebase.database();
+
+    // Function to fetch today's activity data
+    function fetchActivityData(empcode) {
+      const today = new Date().toISOString().split('T')[0]; // Get today's date in YYYY-MM-DD format
+      const activityRef = database.ref(`activity/${today}/${empcode}`);
+
+      activityRef.once('value', (snapshot) => {
+        const activityData = snapshot.val();
+        const activityDiv = document.getElementById('activityData');
+
+        if (activityData) {
+          activityDiv.innerHTML = `
+            <h2>Activity for ${empcode}</h2>
+            <p><strong>Check-in Time:</strong> ${activityData.checkin_time}</p>
+            <p><strong>Check-out Time:</strong> ${activityData.checkout_time}</p>
+            <p><strong>Latitude:</strong> ${activityData.latitude}</p>
+            <p><strong>Longitude:</strong> ${activityData.longitude}</p>
+          `;
+        } else {
+          activityDiv.innerHTML = `<p>No activity found for ${empcode} today.</p>`;
+        }
+      });
+    }
+
+    // Handle form submission
+    document.getElementById('empForm').addEventListener('submit', (e) => {
+      e.preventDefault();
+      const empcode = document.getElementById('empcode').value.trim();
+      if (empcode) {
+        fetchActivityData(empcode);
+      } else {
+        alert('Please enter an employee code.');
+      }
+    });
+  </script>
+</body>
+</html>
